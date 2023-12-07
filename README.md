@@ -1,7 +1,7 @@
 # Сервис астрологических прогнозов для молодежи
 ![meme](https://sun9-61.userapi.com/impg/Ik6Uu0Bs72AykhG4EuL9Z3Q_memk_VcGLc6bfw/VGVK9PDxMv0.jpg?size=768x402&quality=96&sign=1ebfbb3e7beb4f3916cace9c52593747&type=album)
 
-Сервис Использует асинхронный воркер для получения метаданных и изображения [APOD](https://apod.nasa.gov/apod/astropix.html).
+Сервис использует асинхронный воркер для получения метаданных и изображения [APOD](https://apod.nasa.gov/apod/astropix.html).
 
 # Технологии
 Для хранения метаданных используется PostgreSQL, в качестве бинарного хранилища для картинок используется MinIO. Для конфигурирования использованы переменные окружения.

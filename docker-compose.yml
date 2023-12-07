@@ -1,0 +1,68 @@
+services:
+  storage:
+    image: postgres
+    restart: always
+    hostname: storage
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: apod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    networks:
+      - web
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+      - DATABASE_DSN=${DATABASE_DSN}
+      - WORKER_INTERVAL=${WORKER_INTERVAL}
+      - WORKER_RETRIES=${WORKER_RETRIES}
+      - APOD_API=${APOD_API}
+      - M_ENDPOINT=${M_ENDPOINT}
+      - M_BUCKET=${M_BUCKET}
+      - M_USER=${M_USER}
+      - M_PASS=${M_PASS}
+      - M_PORT=${M_PORT}
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    depends_on:
+      - storage
+      - minio
+    networks:
+      - web
+    restart: always
+  minio:
+    image: minio/minio:latest
+    command: server --console-address ":9001" /data/
+    ports:
+      - ${M_PORT}:${M_PORT}
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${M_USER}
+      MINIO_ROOT_PASSWORD: ${M_PASS}
+    volumes:
+      - minio-storage:/data
+    networks:
+      - web
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    networks:
+      - web
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set mm http://minio:$$M_PORT $$M_USER $$M_PASS;
+      /usr/bin/mc mb mm/images;
+      /usr/bin/mc anonymous set public mm/images;
+      exit 0;
+      "
+volumes:
+  minio-storage:
+networks:
+  web:
